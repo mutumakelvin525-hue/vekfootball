@@ -10,7 +10,7 @@ HTML = """
 <!DOCTYPE html>
 <html>
 <head>
-    <title>World Cup Analyzer</title>
+    <title>VekFootball</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
         body { font-family: Arial; background: #1a1a2e; color: white; margin: 0; padding: 10px; }
@@ -22,7 +22,7 @@ HTML = """
     </style>
 </head>
 <body>
-    <h1>⚽ World Cup Analyzer</h1>
+    <h1>⚽ VekFootball</h1>
 
     <div class="card">
         <button class="btn" onclick="fetch('/live').then(r=>r.json()).then(d=>show(d))">🔴 Live Scores</button>

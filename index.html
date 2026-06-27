@@ -19,7 +19,7 @@ body{font-family:Arial;background:#0a150a;color:white;max-width:480px;margin:0 a
 .card{background:#0d200d;border-radius:12px;padding:14px;margin-bottom:12px}
 .match-card{background:#0d200d;border-radius:12px;padding:14px;margin-bottom:10px;cursor:pointer;border:1px solid transparent}
 .match-card.live{border-color:#1a7a1a}
-.match-body{display:flex;align-items:center;justify-content:space-between}
+.match-body{display:flex;align-items:center;justify-content:space-between;margin-top:8px}
 .score-box{padding:4px 14px;background:#1a7a1a;border-radius:8px;margin:0 10px;font-size:16px;font-weight:bold;min-width:60px;text-align:center}
 .btn{background:linear-gradient(135deg,#1a7a1a,#a3e635);color:white;border:none;padding:12px;border-radius:10px;cursor:pointer;width:100%;font-size:15px;font-weight:bold;margin:5px 0}
 .tabs{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
@@ -33,9 +33,8 @@ body{font-family:Arial;background:#0a150a;color:white;max-width:480px;margin:0 a
 .news-card{background:#0d200d;border-radius:12px;padding:14px;margin-bottom:10px}
 .table-row{display:flex;padding:10px 14px;align-items:center;border-bottom:1px solid #1a3a1a}
 .ai-box{background:linear-gradient(135deg,#0d200d,#1a3a0d);border-radius:12px;padding:16px;margin-bottom:12px;border:1px solid #1a7a1a}
-.form-badge{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:bold}
-.back-btn{background:none;border:none;color:#a3e635;font-size:14px;cursor:pointer;margin-bottom:10px;padding:5px 0}
-select{width:100%;padding:10px;margin:5px 0;border-radius:8px;background:#0d200d;color:white;border:1px solid #1a7a1a}
+.form-badge{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:bold;color:white}
+.back-btn{background:none;border:none;color:#a3e635;font-size:14px;cursor:pointer;margin-bottom:10px;padding:5px 0;display:block}
 </style>
 </head>
 <body>
@@ -48,15 +47,14 @@ select{width:100%;padding:10px;margin:5px 0;border-radius:8px;background:#0d200d
 </div>
 <div class="filters">
 <div class="filter active">All</div>
+<div class="filter">World Cup</div>
 <div class="filter">Premier League</div>
 <div class="filter">La Liga</div>
-<div class="filter">UCL</div>
-<div class="filter">Serie A</div>
 </div>
 <div class="content">
 <div id="tab-scores">
 <div class="section-title">Today's Matches</div>
-<div id="matches-list"></div>
+<div id="matches-list"><div style="text-align:center;padding:30px;color:#a3e635">⚽ Loading...</div></div>
 </div>
 <div id="tab-standings" style="display:none">
 <div class="section-title">Standings</div>
@@ -76,18 +74,14 @@ select{width:100%;padding:10px;margin:5px 0;border-radius:8px;background:#0d200d
 </div>
 </div>
 <nav class="bottom-nav">
-<button class="nav-btn active" onclick="showTab('scores')" id="nav-scores"><span style="font-size:20px">⚽</span>Scores</button>
-<button class="nav-btn" onclick="showTab('standings')" id="nav-standings"><span style="font-size:20px">🏆</span>Standings</button>
-<button class="nav-btn" onclick="showTab('players')" id="nav-players"><span style="font-size:20px">👤</span>Players</button>
-<button class="nav-btn" onclick="showTab('news')" id="nav-news"><span style="font-size:20px">📰</span>News</button>
+<button class="nav-btn active" id="nav-scores" onclick="showTab('scores')"><span style="font-size:20px">⚽</span>Scores</button>
+<button class="nav-btn" id="nav-standings" onclick="showTab('standings')"><span style="font-size:20px">🏆</span>Standings</button>
+<button class="nav-btn" id="nav-players" onclick="showTab('players')"><span style="font-size:20px">👤</span>Players</button>
+<button class="nav-btn" id="nav-news" onclick="showTab('news')"><span style="font-size:20px">📰</span>News</button>
 </nav>
 <script>
-const matches=[
-{id:1,home:"Arsenal",away:"Man City",hs:2,as:1,time:"67'",live:true,league:"Premier League"},
-{id:2,home:"Real Madrid",away:"Barcelona",hs:1,as:1,time:"45'",live:true,league:"La Liga"},
-{id:3,home:"PSG",away:"Bayern",hs:0,as:0,time:"18:00",live:false,league:"UCL"},
-{id:4,home:"Chelsea",away:"Liverpool",hs:0,as:0,time:"20:45",live:false,league:"Premier League"},
-];
+var allMatches = [];
+
 const standings=[
 {pos:1,team:"Man City",p:28,w:20,d:5,l:3,pts:65},
 {pos:2,team:"Arsenal",p:28,w:19,d:4,l:5,pts:61},
@@ -101,160 +95,210 @@ const players=[
 {name:"Vinicius Jr",team:"Real Madrid",goals:18,assists:9,rating:8.6},
 ];
 const news=[
-{title:"Haaland breaks Premier League scoring record",time:"2h ago",tag:"PL",color:"#1a7a1a"},
-{title:"Mbappe confirms Real Madrid future",time:"4h ago",tag:"Transfer",color:"#a3e635"},
-{title:"Barcelona win El Clasico in comeback",time:"6h ago",tag:"La Liga",color:"#f59e0b"},
-{title:"Champions League draw announced",time:"8h ago",tag:"UCL",color:"#8b5cf6"},
+{title:"World Cup 2026: Belgium beat New Zealand 5-1",time:"2h ago",tag:"WC2026",color:"#1a7a1a"},
+{title:"Uruguay beat Spain in World Cup upset",time:"4h ago",tag:"WC2026",color:"#a3e635"},
+{title:"Colombia vs Portugal tonight at 23:30",time:"1h ago",tag:"WC2026",color:"#f59e0b"},
+{title:"Panama vs England kickoff at 21:00",time:"30m ago",tag:"WC2026",color:"#8b5cf6"},
 ];
+
 function showTab(t){
 ['scores','standings','players','news','match'].forEach(x=>{
 document.getElementById('tab-'+x).style.display='none';
-const n=document.getElementById('nav-'+x);
+var n=document.getElementById('nav-'+x);
 if(n)n.classList.remove('active');
 });
 document.getElementById('tab-'+t).style.display='block';
-const n=document.getElementById('nav-'+t);
+var n=document.getElementById('nav-'+t);
 if(n)n.classList.add('active');
 if(t==='standings')renderStandings();
 if(t==='players')renderPlayers();
 if(t==='news')renderNews();
 }
-function renderMatches(){
-document.getElementById('matches-list').innerHTML=matches.map(m=>`
-<div class="match-card ${m.live?'live':''}" onclick="showMatch(${m.id})">
-<div style="display:flex;justify-content:space-between;margin-bottom:8px">
-<span style="font-size:11px;color:#a0c0a0">${m.league}</span>
-${m.live?'<span style="background:#ef4444;border-radius:4px;padding:2px 6px;font-size:10px;font-weight:bold">🔴 LIVE</span>':''}
-</div>
-<div class="match-body">
-<div style="flex:1;text-align:right;font-size:14px;font-weight:bold">${m.home}</div>
-<div class="score-box" style="${m.live?'':'background:#0d2d0d'}">${m.live?m.hs+'-'+m.as:m.time}</div>
-<div style="flex:1;text-align:left;font-size:14px;font-weight:bold">${m.away}</div>
-</div>
-</div>`).join('');
-}
-function renderStandings(){
-document.getElementById('standings-list').innerHTML=
-'<div class="table-row" style="color:#a0c0a0;font-size:11px"><span style="width:24px">#</span><span style="flex:1">Team</span><span style="width:24px;text-align:center">P</span><span style="width:24px;text-align:center">W</span><span style="width:30px;text-align:center;font-weight:bold">Pts</span></div>'+
-standings.map((s,i)=>`<div class="table-row"><span style="width:24px;color:${i<4?'#a3e635':'white'};font-weight:bold">${s.pos}</span><span style="flex:1;font-size:13px">${s.team}</span><span style="width:24px;text-align:center;font-size:12px">${s.p}</span><span style="width:24px;text-align:center;font-size:12px">${s.w}</span><span style="width:30px;text-align:center;font-weight:bold;color:#a3e635">${s.pts}</span></div>`).join('');
-}
-function renderPlayers(){
-document.getElementById('players-list').innerHTML=players.map(p=>`
-<div class="player-card">
-<div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#1a7a1a,#a3e635);display:flex;align-items:center;justify-content:center;font-size:20px">👤</div>
-<div style="flex:1"><div style="font-weight:bold;font-size:14px">${p.name}</div><div style="font-size:11px;color:#a0c0a0">${p.team}</div>
-<div style="display:flex;gap:12px;margin-top:6px"><span style="font-size:11px">⚽ ${p.goals}</span><span style="font-size:11px">🎯 ${p.assists}</span></div></div>
-<div style="background:#1a7a1a;border-radius:8px;padding:4px 8px;font-weight:bold">${p.rating}</div>
-</div>`).join('');
-}
-function renderNews(){
-document.getElementById('news-list').innerHTML=news.map(n=>`
-<div class="news-card">
-<div style="display:flex;justify-content:space-between;margin-bottom:6px">
-<span style="background:${n.color};border-radius:4px;padding:2px 8px;font-size:10px;font-weight:bold">${n.tag}</span>
-<span style="font-size:11px;color:#a0c0a0">${n.time}</span>
-</div>
-<div style="font-size:14px;font-weight:bold;line-height:1.4">${n.title}</div>
-</div>`).join('');
-}
-function showMatchById(i){
-    const m = allMatches[i];
-    showMatchData(m);
-}
-function showMatch(id){
-const m=matches.find(x=>x.id===id);
-document.getElementById('match-detail').innerHTML=`
-<div class="card" style="text-align:center">
-<div style="font-size:11px;color:#a0c0a0;margin-bottom:8px">${m.league}</div>
-<div style="display:flex;justify-content:space-between;align-items:center">
-<div style="text-align:center;flex:1"><div style="font-size:28px">⚽</div><div style="font-size:14px;font-weight:bold">${m.home}</div></div>
-<div><div style="font-size:28px;font-weight:bold;color:#a3e635">${m.hs} - ${m.as}</div><div style="font-size:11px;color:${m.live?'#ef4444':'#a0c0a0'}">${m.time}</div></div>
-<div style="text-align:center;flex:1"><div style="font-size:28px">⚽</div><div style="font-size:14px;font-weight:bold">${m.away}</div></div>
-</div></div>
-<div class="tabs">
-<button class="tab active" onclick="switchTab(this,'stats-${m.id}')">Stats</button>
-<button class="tab" onclick="switchTab(this,'lineup-${m.id}')">Lineup</button>
-<button class="tab" onclick="switchTab(this,'h2h-${m.id}')">H2H</button>
-<button class="tab" onclick="switchTab(this,'history-${m.id}')">History</button>
-<button class="tab" onclick="switchTab(this,'ai-${m.id}');loadAI('${m.home}','${m.away}','${m.id}')">🤖 AI</button>
-</div>
-<div id="stats-${m.id}">${renderStats()}</div>
-<div id="lineup-${m.id}" style="display:none">${renderLineup(m.home,m.away)}</div>
-<div id="h2h-${m.id}" style="display:none">${renderH2H(m.home,m.away)}</div>
-<div id="history-${m.id}" style="display:none">${renderHistory(m.home)}</div>
-<div id="ai-${m.id}" style="display:none">${renderAIBox(m.home,m.away,m.id)}</div>`;
-showTab('match');
-}
-function switchTab(btn,id){
-btn.closest('.tabs').querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-btn.classList.add('active');
-const parts=id.split('-');
-const mid=parts[parts.length-1];
-['stats','lineup','h2h','history','ai'].forEach(t=>{
-const el=document.getElementById(t+'-'+mid);
-if(el)el.style.display='none';
-});
-document.getElementById(id).style.display='block';
-}
-function renderStats(){
-return '<div class="card">'+[['Possession','58%','42%',58],['Shots','12','7',63],['On Target','5','3',62],['Corners','6','3',67],['Fouls','8','11',42]].map(([s,h,a,p])=>`
-<div style="margin-bottom:12px">
-<div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px">
-<span style="color:#a3e635;font-weight:bold">${h}</span><span style="color:#a0c0a0">${s}</span><span style="font-weight:bold">${a}</span></div>
-<div style="height:5px;background:#1a3a1a;border-radius:3px;overflow:hidden"><div style="height:100%;width:${p}%;background:linear-gradient(90deg,#1a7a1a,#a3e635);border-radius:3px"></div></div>
-</div>`).join('')+'</div>';
-}
-function renderLineup(h,a){
-return '<div class="card"><div style="display:flex;gap:10px"><div style="flex:1"><div style="font-weight:bold;margin-bottom:8px;color:#a3e635;font-size:13px">'+h+'</div>'+['Raya','White Saliba Zinchenko','Odegaard Rice','Saka Havertz Martinelli'].map(r=>'<div style="font-size:11px;margin-bottom:6px">'+r.split(' ').map(p=>'<div>• '+p+'</div>').join('')+'</div>').join('')+'</div><div style="flex:1"><div style="font-weight:bold;margin-bottom:8px;color:#1a7a1a;font-size:13px">'+a+'</div>'+['Ederson','Walker Dias Gvardiol','Rodri De Bruyne','Bernardo Haaland Doku'].map(r=>'<div style="font-size:11px;margin-bottom:6px">'+r.split(' ').map(p=>'<div>• '+p+'</div>').join('')+'</div>').join('')+'</div></div></div>';
-}
-function renderH2H(h,a){
-return '<div class="card"><div style="display:flex;justify-content:space-around;margin-bottom:16px"><div style="text-align:center"><div style="font-size:24px;font-weight:bold;color:#a3e635">12</div><div style="font-size:10px;color:#a3e635">'+h+'</div></div><div style="text-align:center"><div style="font-size:24px;font-weight:bold;color:#f59e0b">5</div><div style="font-size:10px;color:#a0c0a0">Draws</div></div><div style="text-align:center"><div style="font-size:24px;font-weight:bold;color:#1a7a1a">8</div><div style="font-size:10px;color:#1a7a1a">'+a+'</div></div></div><div style="height:10px;background:#1a3a1a;border-radius:5px;overflow:hidden;display:flex"><div style="width:48%;background:#a3e635"></div><div style="width:20%;background:#f59e0b"></div><div style="width:32%;background:#1a7a1a"></div></div></div>'+[{d:'Mar 2024',hs:2,as:0},{d:'Oct 2023',hs:1,as:1},{d:'Apr 2023',hs:3,as:1},{d:'Jan 2023',hs:1,as:3}].map(g=>'<div class="card" style="display:flex;align-items:center;border-left:3px solid '+(g.hs>g.as?'#a3e635':g.as>g.hs?'#1a7a1a':'#f59e0b')+'"><span style="font-size:11px;color:#a0c0a0;width:65px">'+g.d+'</span><div style="flex:1;display:flex;justify-content:space-between;align-items:center"><span style="font-size:13px">'+h+'</span><span style="background:'+(g.hs>g.as?'#a3e635':g.as>g.hs?'#1a7a1a':'#f59e0b')+';border-radius:6px;padding:3px 10px;font-weight:bold">'+g.hs+'-'+g.as+'</span><span style="font-size:13px">'+a+'</span></div></div>').join('');
-}
-function renderHistory(h){
-return '<div class="card"><div style="font-weight:bold;margin-bottom:8px">'+h+' Recent Form</div><div style="display:flex;gap:6px">'+['W','W','D','W','L'].map(r=>'<div class="form-badge" style="background:'+(r==='W'?'#10b981':r==='D'?'#f59e0b':'#ef4444')+'">'+r+'</div>').join('')+'</div></div>'+[{opp:'Chelsea',hs:3,as:1},{opp:'Liverpool',hs:2,as:2},{opp:'Spurs',hs:4,as:0},{opp:'Newcastle',hs:1,as:0}].map(g=>'<div class="card" style="display:flex;align-items:center;border-left:3px solid '+(g.hs>g.as?'#10b981':g.hs===g.as?'#f59e0b':'#ef4444')+'"><span style="flex:1;font-size:13px">'+h+' vs '+g.opp+'</span><span style="font-weight:bold;color:'+(g.hs>g.as?'#10b981':g.hs===g.as?'#f59e0b':'#ef4444')+'">'+g.hs+'-'+g.as+'</span></div>').join('');
-}
-function renderAIBox(h,a,id){
-return '<div class="ai-box"><div style="display:flex;align-items:center;gap:8px;margin-bottom:12px"><span style="font-size:24px">🤖</span><div><div style="font-weight:bold">Claude AI Prediction</div><div style="font-size:11px;color:#a0c0a0">Powered by Anthropic</div></div></div><div id="ai-content-'+id+'" style="text-align:center;padding:20px"><div style="font-size:40px;margin-bottom:8px">🔮</div><div style="color:#a0c0a0;font-size:13px;margin-bottom:12px">AI prediction based on real stats</div><button class="btn" style="width:auto;padding:10px 24px;border-radius:20px" onclick="loadAI(''+h+'',''+a+'',''+id+'')">✨ Generate</button></div></div><div class="card"><div style="font-size:12px;color:#a0c0a0;margin-bottom:10px">Win Probability</div>'+[[h+' Win',52,'#a3e635'],['Draw',22,'#f59e0b'],[a+' Win',26,'#1a7a1a']].map(([l,p,c])=>'<div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>'+l+'</span><span style="color:'+c+';font-weight:bold">'+p+'%</span></div><div style="height:6px;background:#1a3a1a;border-radius:3px;overflow:hidden"><div style="height:100%;width:'+p+'%;background:'+c+';border-radius:3px"></div></div></div>').join('')+'</div>';
-}
-async function loadAI(h,a,id){
-document.getElementById('ai-content-'+id).innerHTML='<div style="padding:20px;color:#a3e635;text-align:center">⚙️ Analyzing...</div>';
-try{
-const r=await fetch('/ai_predict?home='+encodeURIComponent(h)+'&away='+encodeURIComponent(a));
-const d=await r.json();
-document.getElementById('ai-content-'+id).innerHTML='<div style="background:rgba(26,122,26,0.1);border-radius:8px;padding:12px;font-size:13px;line-height:1.6;color:#e0ffe0">'+d.prediction+'</div><button class="btn" style="width:auto;padding:6px 16px;border-radius:16px;font-size:12px;margin-top:10px" onclick="loadAI(''+h+'',''+a+'',''+id+'')">🔄 Regenerate</button>';
-}catch(e){document.getElementById('ai-content-'+id).innerHTML='<div style="color:#ef4444">Error loading prediction</div>';}
-}
-
-
-var allMatches = [];
 
 async function loadMatches(){
-    document.getElementById('matches-list').innerHTML='<div style="text-align:center;padding:20px;color:#a3e635">⚽ Loading matches...</div>';
-    try{
-        const r = await fetch('/matches');
-        const data = await r.json();
-        if(!data.length){
-            document.getElementById('matches-list').innerHTML='<div style="text-align:center;padding:20px;color:#a0c0a0">No matches today</div>';
-            return;
-        }
-        allMatches = data;
-        document.getElementById('matches-list').innerHTML=data.map((m,i)=>`
-        <div class="match-card ${m.live?'live':''}" onclick="showMatchById(${i})">
-        <div style="display:flex;justify-content:space-between;margin-bottom:8px">
-        <span style="font-size:11px;color:#a0c0a0">${m.league}</span>
-        ${m.live?'<span style="background:#ef4444;border-radius:4px;padding:2px 6px;font-size:10px;font-weight:bold">🔴 LIVE</span>':'<span style="font-size:10px;color:#a0c0a0">${m.date}</span>'}
-        </div>
-        <div class="match-body">
-        <div style="flex:1;text-align:right;font-size:14px;font-weight:bold">${m.home}</div>
-        <div class="score-box" style="${m.live?'':'background:#0d2d0d'}">${m.live?m.home_score+'-'+m.away_score:m.time}</div>
-        <div style="flex:1;text-align:left;font-size:14px;font-weight:bold">${m.away}</div>
-        </div></div>`).join('');
-    }catch(e){
-        document.getElementById('matches-list').innerHTML='<div style="text-align:center;padding:20px;color:#ef4444">Error loading matches</div>';
-    }
+document.getElementById('matches-list').innerHTML='<div style="text-align:center;padding:30px;color:#a3e635">⚽ Loading matches...</div>';
+try{
+var r = await fetch('/matches');
+var data = await r.json();
+allMatches = data;
+if(!data || !data.length){
+document.getElementById('matches-list').innerHTML='<div style="text-align:center;padding:30px;color:#a0c0a0">No matches today</div>';
+return;
 }
-window.onload = function(){ loadMatches(); setInterval(loadMatches, 30000); };
+var html='';
+for(var i=0;i<data.length;i++){
+var m=data[i];
+html+='<div class="match-card '+(m.live?'live':'')+'" onclick="openMatch('+i+')">';
+html+='<div style="display:flex;justify-content:space-between">';
+html+='<span style="font-size:11px;color:#a0c0a0">'+m.league+'</span>';
+if(m.live) html+='<span style="background:#ef4444;border-radius:4px;padding:2px 6px;font-size:10px;font-weight:bold">🔴 LIVE</span>';
+else html+='<span style="font-size:11px;color:#a0c0a0">'+m.status+'</span>';
+html+='</div>';
+html+='<div class="match-body">';
+html+='<div style="flex:1;text-align:right;font-size:14px;font-weight:bold">'+m.home+'</div>';
+var scoreDisplay = m.live ? m.home_score+'-'+m.away_score : m.time;
+html+='<div class="score-box" style="'+(m.live?'':'background:#0d2d0d')+'">'+scoreDisplay+'</div>';
+html+='<div style="flex:1;text-align:left;font-size:14px;font-weight:bold">'+m.away+'</div>';
+html+='</div></div>';
+}
+document.getElementById('matches-list').innerHTML=html;
+}catch(e){
+document.getElementById('matches-list').innerHTML='<div style="text-align:center;padding:30px;color:#ef4444">Error: '+e.message+'</div>';
+}
+}
 
+function openMatch(i){
+var m=allMatches[i];
+if(!m)return;
+var html='';
+html+='<div class="card" style="text-align:center">';
+html+='<div style="font-size:11px;color:#a0c0a0;margin-bottom:8px">'+m.league+'</div>';
+html+='<div style="display:flex;justify-content:space-between;align-items:center">';
+html+='<div style="text-align:center;flex:1"><div style="font-size:28px">⚽</div><div style="font-size:13px;font-weight:bold">'+m.home+'</div></div>';
+html+='<div style="text-align:center"><div style="font-size:26px;font-weight:bold;color:#a3e635">'+m.home_score+' - '+m.away_score+'</div><div style="font-size:11px;color:'+(m.live?'#ef4444':'#a0c0a0')+'">'+m.status+'</div></div>';
+html+='<div style="text-align:center;flex:1"><div style="font-size:28px">⚽</div><div style="font-size:13px;font-weight:bold">'+m.away+'</div></div>';
+html+='</div></div>';
+html+='<div class="tabs">';
+html+='<button class="tab active" onclick="switchMatchTab(this,'stats')">Stats</button>';
+html+='<button class="tab" onclick="switchMatchTab(this,'lineup')">Lineup</button>';
+html+='<button class="tab" onclick="switchMatchTab(this,'h2h')">H2H</button>';
+html+='<button class="tab" onclick="switchMatchTab(this,'history')">History</button>';
+html+='<button class="tab" onclick="switchMatchTab(this,'ai');loadAI()">🤖 AI</button>';
+html+='</div>';
+html+='<div id="mtab-stats">'+renderStats()+'</div>';
+html+='<div id="mtab-lineup" style="display:none">'+renderLineup(m.home,m.away)+'</div>';
+html+='<div id="mtab-h2h" style="display:none">'+renderH2H(m.home,m.away)+'</div>';
+html+='<div id="mtab-history" style="display:none">'+renderHistory(m.home)+'</div>';
+html+='<div id="mtab-ai" style="display:none">'+renderAIBox(m.home,m.away)+'</div>';
+document.getElementById('match-detail').innerHTML=html;
+document.getElementById('currentHome').value=m.home;
+document.getElementById('currentAway').value=m.away;
+showTab('match');
+}
+
+function switchMatchTab(btn,name){
+btn.closest('.tabs').querySelectorAll('.tab').forEach(function(t){t.classList.remove('active')});
+btn.classList.add('active');
+['stats','lineup','h2h','history','ai'].forEach(function(t){
+var el=document.getElementById('mtab-'+t);
+if(el)el.style.display='none';
+});
+document.getElementById('mtab-'+name).style.display='block';
+}
+
+function renderStats(){
+var stats=[['Possession','58%','42%',58],['Shots','12','7',63],['On Target','5','3',62],['Corners','6','3',67],['Fouls','8','11',42]];
+var h='<div class="card">';
+stats.forEach(function(s){
+h+='<div style="margin-bottom:12px">';
+h+='<div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px">';
+h+='<span style="color:#a3e635;font-weight:bold">'+s[1]+'</span>';
+h+='<span style="color:#a0c0a0">'+s[0]+'</span>';
+h+='<span style="font-weight:bold">'+s[2]+'</span></div>';
+h+='<div style="height:5px;background:#1a3a1a;border-radius:3px;overflow:hidden">';
+h+='<div style="height:100%;width:'+s[3]+'%;background:linear-gradient(90deg,#1a7a1a,#a3e635)"></div></div></div>';
+});
+return h+'</div>';
+}
+
+function renderLineup(h,a){
+var rows=['GK','RB CB CB LB','CM CDM CM','RW ST LW'];
+var res='<div class="card"><div style="display:flex;gap:10px">';
+res+='<div style="flex:1"><div style="font-weight:bold;margin-bottom:8px;color:#a3e635;font-size:13px">'+h+'</div>';
+['Raya','White Saliba Zinchenko','Odegaard Rice','Saka Havertz Martinelli'].forEach(function(r){
+res+='<div style="font-size:11px;margin-bottom:6px">';
+r.split(' ').forEach(function(p){res+='<div>• '+p+'</div>';});
+res+='</div>';
+});
+res+='</div><div style="flex:1"><div style="font-weight:bold;margin-bottom:8px;color:#1a7a1a;font-size:13px">'+a+'</div>';
+['Ederson','Walker Dias Gvardiol','Rodri De Bruyne','Bernardo Haaland Doku'].forEach(function(r){
+res+='<div style="font-size:11px;margin-bottom:6px">';
+r.split(' ').forEach(function(p){res+='<div>• '+p+'</div>';});
+res+='</div>';
+});
+return res+'</div></div></div>';
+}
+
+function renderH2H(h,a){
+var games=[{d:'Mar 2024',hs:2,as:0},{d:'Oct 2023',hs:1,as:1},{d:'Apr 2023',hs:3,as:1},{d:'Jan 2023',hs:1,as:3}];
+var res='<div class="card"><div style="display:flex;justify-content:space-around;margin-bottom:16px">';
+res+='<div style="text-align:center"><div style="font-size:24px;font-weight:bold;color:#a3e635">12</div><div style="font-size:10px;color:#a3e635">'+h+'</div></div>';
+res+='<div style="text-align:center"><div style="font-size:24px;font-weight:bold;color:#f59e0b">5</div><div style="font-size:10px;color:#a0c0a0">Draws</div></div>';
+res+='<div style="text-align:center"><div style="font-size:24px;font-weight:bold;color:#1a7a1a">8</div><div style="font-size:10px;color:#1a7a1a">'+a+'</div></div>';
+res+='</div><div style="height:10px;background:#1a3a1a;border-radius:5px;overflow:hidden;display:flex">';
+res+='<div style="width:48%;background:#a3e635"></div><div style="width:20%;background:#f59e0b"></div><div style="width:32%;background:#1a7a1a"></div></div></div>';
+games.forEach(function(g){
+var c=g.hs>g.as?'#a3e635':g.as>g.hs?'#1a7a1a':'#f59e0b';
+res+='<div class="card" style="display:flex;align-items:center;border-left:3px solid '+c+'">';
+res+='<span style="font-size:11px;color:#a0c0a0;width:65px">'+g.d+'</span>';
+res+='<div style="flex:1;display:flex;justify-content:space-between;align-items:center">';
+res+='<span>'+h+'</span>';
+res+='<span style="background:'+c+';border-radius:6px;padding:3px 10px;font-weight:bold">'+g.hs+'-'+g.as+'</span>';
+res+='<span>'+a+'</span></div></div>';
+});
+return res;
+}
+
+function renderHistory(h){
+var form=['W','W','D','W','L'];
+var games=[{opp:'Chelsea',hs:3,as:1},{opp:'Liverpool',hs:2,as:2},{opp:'Spurs',hs:4,as:0},{opp:'Newcastle',hs:1,as:0}];
+var res='<div class="card"><div style="font-weight:bold;margin-bottom:8px">'+h+' Recent Form</div><div style="display:flex;gap:6px">';
+form.forEach(function(r){
+res+='<div class="form-badge" style="background:'+(r==='W'?'#10b981':r==='D'?'#f59e0b':'#ef4444')+'">'+r+'</div>';
+});
+res+='</div></div>';
+games.forEach(function(g){
+var c=g.hs>g.as?'#10b981':g.hs===g.as?'#f59e0b':'#ef4444';
+res+='<div class="card" style="display:flex;align-items:center;border-left:3px solid '+c+'">';
+res+='<span style="flex:1;font-size:13px">'+h+' vs '+g.opp+'</span>';
+res+='<span style="font-weight:bold;color:'+c+'">'+g.hs+'-'+g.as+'</span></div>';
+});
+return res;
+}
+
+function renderAIBox(h,a){
+return '<div class="ai-box"><div style="display:flex;align-items:center;gap:8px;margin-bottom:12px"><span style="font-size:24px">🤖</span><div><div style="font-weight:bold">Claude AI Prediction</div><div style="font-size:11px;color:#a0c0a0">Powered by Anthropic</div></div></div><div id="ai-content" style="text-align:center;padding:20px"><div style="font-size:40px;margin-bottom:8px">🔮</div><div style="color:#a0c0a0;font-size:13px;margin-bottom:12px">AI prediction based on real stats</div><button class="btn" style="width:auto;padding:10px 24px;border-radius:20px" onclick="loadAI()">✨ Generate</button></div></div><div class="card"><div style="font-size:12px;color:#a0c0a0;margin-bottom:10px">Win Probability</div><div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>'+h+' Win</span><span style="color:#a3e635;font-weight:bold">52%</span></div><div style="height:6px;background:#1a3a1a;border-radius:3px;overflow:hidden"><div style="height:100%;width:52%;background:#a3e635;border-radius:3px"></div></div></div><div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>Draw</span><span style="color:#f59e0b;font-weight:bold">22%</span></div><div style="height:6px;background:#1a3a1a;border-radius:3px;overflow:hidden"><div style="height:100%;width:22%;background:#f59e0b;border-radius:3px"></div></div></div><div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>'+a+' Win</span><span style="color:#1a7a1a;font-weight:bold">26%</span></div><div style="height:6px;background:#1a3a1a;border-radius:3px;overflow:hidden"><div style="height:100%;width:26%;background:#1a7a1a;border-radius:3px"></div></div></div></div>';
+}
+
+async function loadAI(){
+var h=document.getElementById('currentHome').value;
+var a=document.getElementById('currentAway').value;
+document.getElementById('ai-content').innerHTML='<div style="padding:20px;color:#a3e635;text-align:center">⚙️ Analyzing...</div>';
+try{
+var r=await fetch('/ai_predict?home='+encodeURIComponent(h)+'&away='+encodeURIComponent(a));
+var d=await r.json();
+document.getElementById('ai-content').innerHTML='<div style="background:rgba(26,122,26,0.1);border-radius:8px;padding:12px;font-size:13px;line-height:1.6;color:#e0ffe0">'+d.prediction+'</div><button class="btn" style="width:auto;padding:6px 16px;border-radius:16px;font-size:12px;margin-top:10px" onclick="loadAI()">🔄 Regenerate</button>';
+}catch(e){document.getElementById('ai-content').innerHTML='<div style="color:#ef4444">Error</div>';}
+}
+
+function renderStandings(){
+var h='<div class="table-row" style="color:#a0c0a0;font-size:11px"><span style="width:24px">#</span><span style="flex:1">Team</span><span style="width:24px;text-align:center">P</span><span style="width:24px;text-align:center">W</span><span style="width:30px;text-align:center">Pts</span></div>';
+standings.forEach(function(s,i){
+h+='<div class="table-row"><span style="width:24px;color:'+(i<4?'#a3e635':'white')+';font-weight:bold">'+s.pos+'</span><span style="flex:1;font-size:13px">'+s.team+'</span><span style="width:24px;text-align:center;font-size:12px">'+s.p+'</span><span style="width:24px;text-align:center;font-size:12px">'+s.w+'</span><span style="width:30px;text-align:center;font-weight:bold;color:#a3e635">'+s.pts+'</span></div>';
+});
+document.getElementById('standings-list').innerHTML=h;
+}
+
+function renderPlayers(){
+var h='';
+players.forEach(function(p){
+h+='<div class="player-card"><div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#1a7a1a,#a3e635);display:flex;align-items:center;justify-content:center;font-size:20px">👤</div><div style="flex:1"><div style="font-weight:bold;font-size:14px">'+p.name+'</div><div style="font-size:11px;color:#a0c0a0">'+p.team+'</div><div style="display:flex;gap:12px;margin-top:6px"><span style="font-size:11px">⚽ '+p.goals+'</span><span style="font-size:11px">🎯 '+p.assists+'</span></div></div><div style="background:#1a7a1a;border-radius:8px;padding:4px 8px;font-weight:bold">'+p.rating+'</div></div>';
+});
+document.getElementById('players-list').innerHTML=h;
+}
+
+function renderNews(){
+var h='';
+news.forEach(function(n){
+h+='<div class="news-card"><div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="background:'+n.color+';border-radius:4px;padding:2px 8px;font-size:10px;font-weight:bold">'+n.tag+'</span><span style="font-size:11px;color:#a0c0a0">'+n.time+'</span></div><div style="font-size:14px;font-weight:bold;line-height:1.4">'+n.title+'</div></div>';
+});
+document.getElementById('news-list').innerHTML=h;
+}
+
+loadMatches();
+setInterval(loadMatches, 30000);
 </script>
+<input type="hidden" id="currentHome" value="">
+<input type="hidden" id="currentAway" value="">
 </body>
 </html>

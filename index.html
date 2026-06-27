@@ -157,6 +157,10 @@ document.getElementById('news-list').innerHTML=news.map(n=>`
 <div style="font-size:14px;font-weight:bold;line-height:1.4">${n.title}</div>
 </div>`).join('');
 }
+function showMatchById(i){
+    const m = allMatches[i];
+    showMatchData(m);
+}
 function showMatch(id){
 const m=matches.find(x=>x.id===id);
 document.getElementById('match-detail').innerHTML=`
@@ -221,6 +225,9 @@ document.getElementById('ai-content-'+id).innerHTML='<div style="background:rgba
 }catch(e){document.getElementById('ai-content-'+id).innerHTML='<div style="color:#ef4444">Error loading prediction</div>';}
 }
 
+
+var allMatches = [];
+
 async function loadMatches(){
     document.getElementById('matches-list').innerHTML='<div style="text-align:center;padding:20px;color:#a3e635">⚽ Loading matches...</div>';
     try{
@@ -230,8 +237,9 @@ async function loadMatches(){
             document.getElementById('matches-list').innerHTML='<div style="text-align:center;padding:20px;color:#a0c0a0">No matches today</div>';
             return;
         }
+        allMatches = data;
         document.getElementById('matches-list').innerHTML=data.map((m,i)=>`
-        <div class="match-card ${m.live?'live':''}" onclick="showMatch(${i},${JSON.stringify(m).replace(/"/g,'&quot;')})">
+        <div class="match-card ${m.live?'live':''}" onclick="showMatchById(${i})">
         <div style="display:flex;justify-content:space-between;margin-bottom:8px">
         <span style="font-size:11px;color:#a0c0a0">${m.league}</span>
         ${m.live?'<span style="background:#ef4444;border-radius:4px;padding:2px 6px;font-size:10px;font-weight:bold">🔴 LIVE</span>':'<span style="font-size:10px;color:#a0c0a0">${m.date}</span>'}
